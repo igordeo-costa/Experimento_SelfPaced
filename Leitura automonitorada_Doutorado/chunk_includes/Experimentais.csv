@@ -1,0 +1,25 @@
+group,vies,item,frase,pergunta,respA,respB
+A,cada,1,Cada atleta pintou uma quadra durante a reforma do ginásio.,<b>Quantas quadras foram pintadas?</b>,Apenas uma,Mais de uma
+A,cada,4,Cada bióloga despoluiu um rio durante a gerência do professor.,<b>Quantos rios foram despoluídos?</b>,Apenas um,Mais de um
+A,cada,7,Cada carregador moveu uma mesa durante a mudança de móveis.,<b>Quantas mesas foram movidas?</b>,Apenas uma,Mais de uma
+A,cada,10,Cada vândalo derrubou uma parede durante o protesto de rua.,<b>Quantas paredes foram derrubadas?</b>,Apenas uma,Mais de uma
+A,todo,2,Todo voluntário limpou uma praia durante a faxina da orla.,<b>Quantas praias foram limpadas?</b>,Apenas uma,Mais de uma	
+A,todo,5,Todo zelador varreu um auditório durante a vigília da noite.,<b>Quantos auditórios foram varridos?</b>,Apenas um,Mais de um	
+A,todo,8,Todo cozinheiro preparou um jantar durante o festival de culinária.,<b>Quantos jantares foram preparados?</b>,Apenas um,Mais de um	
+A,todo,11,Toda engenheira consertou um barco durante a disputa de iatismo.,<b>Quantos barcos foram consertados?</b>,Apenas um,Mais de um	
+A,todos os,3,Todos os construtores reformaram uma praça durante o mandato do governador.,<b>Quantas praças foram reformadas?</b>,Apenas uma,Mais de uma	
+A,todos os,6,Todas as mulheres instalaram um lustre durante a reforma da mansão.,<b>Quantos lustres foram instalados?</b>,Apenas um,Mais de um	
+A,todos os,9,Todos os amigos organizaram uma festa durante o recesso de dezembro.,<b>Quantas festas foram organizadas?</b>,Apenas uma,Mais de uma
+A,todos os,12,Todos os lavradores incendiaram um terreno durante a colheita da safra.,<b>Quantos terrenos foram incendiados?</b>,Apenas um,Mais de um
+C,todo,1,Todo atleta pintou uma quadra durante a reforma do ginásio.,<b>Quantas quadras foram pintadas?</b>,Apenas uma,Mais de uma
+C,todo,4,Toda bióloga despoluiu um rio durante a gerência do professor.,<b>Quantos rios foram despoluídos?</b>,Apenas um,Mais de um
+C,todo,7,Todo carregador moveu uma mesa durante a mudança de móveis.,<b>Quantas mesas foram movidas?</b>,Apenas uma,Mais de uma
+C,todo,10,Todo vândalo derrubou uma parede durante o protesto de rua.,<b>Quantas paredes foram derrubadas?</b>,Apenas uma,Mais de uma
+C,todos os,2,Todos os voluntários limparam uma praia durante a faxina da orla.,<b>Quantas praias foram limpadas?</b>,Apenas uma,Mais de uma	
+C,todos os,5,Todos os zeladores varreram um auditório durante a vigília da noite.,<b>Quantos auditórios foram varridos?</b>,Apenas um,Mais de um	
+C,todos os,8,Todos os cozinheiros prepararam um jantar durante o festival de culinária.,<b>Quantos jantares foram preparados?</b>,Apenas um,Mais de um	
+C,todos os,11,Todas as engenheiras consertaram um barco durante a disputa de iatismo.,<b>Quantos barcos foram consertados?</b>,Apenas um,Mais de um	
+C,cada,3,Cada construtor reformou uma praça durante o mandato do governador.,<b>Quantas praças foram reformadas?</b>,Apenas uma,Mais de uma	
+C,cada,6,Cada mulher instalou um lustre durante a reforma da mansão.,<b>Quantos lustres foram instalados?</b>,Apenas um,Mais de um	
+C,cada,9,Cada amigo organizou uma festa durante o recesso de dezembro.,<b>Quantas festas foram organizadas?</b>,Apenas uma,Mais de uma
+C,cada,12,Cada lavrador incendiou um terreno durante a colheita da safra.,<b>Quantos terrenos foram incendiados?</b>,Apenas um,Mais de um

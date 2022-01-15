@@ -1,0 +1,25 @@
+posicao,resposta,item,frase,vies,pergunta,respA,respB
+suj,um,2,Aquela bela e guarnecida loja de frutas abriu após a tempestade repentina.,distratora,<b>Quantas lojas estavam abertas?</b>,Apenas uma,Mais de uma
+suj,um,3,A totalidade da estrada foi interditada após a chuva de verão.,distratora,<b>Quantas estradas foram interditadas?</b>,Apenas uma,Mais de uma
+suj,um,6,Os pedreiros moveram alguns tijolos depois da obra.,distratora,<b>Quantos pedreiros moveram tijolos?</b>,Apenas um,Mais de um
+suj,um,1,O técnico de informática consertou o computador.,distratora,<b>Quantos técnicos consertaram computadores?</b>,Apenas um,Mais de um
+suj,um,4,A solitária cadelinha do vizinho latiu para o carteiro que passava.,distratora,<b>Quantas cadelinhas latiram?</b>,Apenas uma,Mais de uma
+suj,um,14,Um único saxofonista da orquestra sinfônica abriu o concerto.,distratora,<b>Quantos saxofonistas abriram o concerto?</b>,Apenas um,Mais de um
+suj,um,7,O garçom atendeu a mesa enquanto pensava na namorada.,distratora,<b>Quantos garçons atenderam a mesa?</b>,Apenas um,Mais de um
+suj,um,8,Somente um terapeuta avaliou a paciente durante a sessão.,distratora,<b>Quantas terapeutas avaliaram a paciente?</b>,Apenas um,Mais de um
+suj,um,17,O barbeiro pintou o cabelo da jovem.,distratora,<b>Quantos barbeiros pintaram o cabelo da jovem?</b>,Apenas um,Mais de um
+suj,+um,5,Os meninos comeram várias merendas após as aulas.,distratora,<b>Quantos meninos comeram?</b>,Apenas um,Mais de um
+suj,+um,12,Os adolescentes saíram em protesto antes da votação.,distratora,<b>Quantos adolescentes saíram em protesto?</b>,Apenas um,Mais de um
+suj,+um,9,Os garimpeiros poluíram os riachos enquanto invadiam o terreno.,distratora,<b>Quantos garimpeiros estavam poluindo?</b>,Apenas um,Mais de um
+suj,+um,11,Vários feirantes venderam tomates frescos na feira de sábado.,distratora,<b>Quantos feirantes venderam tomates?</b>,Apenas um,Mais de um
+suj,+um,19,Os coelhinhos saltaram pelo gramado.,distratora,<b>Quantos coelhinhos saltaram?</b>,Apenas um,Mais de um
+suj,+um,23,Muitas nuvens de chuva cobriram a praia durante o festival de verão.,distratora,<b>Quantas nuvens havia?</b>,Apenas uma,Mais de uma
+suj,+um,24,Dezenas de ciclistas de montanha se perderam na trilha após a nevasca.,distratora,<b>Quantos ciclistas se perderam?</b>,Apenas um,Mais de um
+suj,+um,25,Inúmeros taxistas fizeram passeatas depois da nova legislação.,distratora,<b>Quantos taxistas fizeram passeatas?</b>,Apenas um,Mais de um
+suj,+um,27,Os meninos passaram por muitas dificuldades ao longo do ano.,distratora,<b>Quantos meninos passaram dificuldades?</b>,Apenas um,Mais de um
+obj,+um,10,A florista vendeu vários arranjos no dia das mães.,distratora,<b>Quantos arranjos foram vendidos?</b>,Apenas um,Mais de um
+obj,+um,13,O pintor de rua elaborou muitas pinturas.,distratora,<b>Quantas pinturas foram elaboradas?</b>,Apenas uma,Mais de uma
+obj,+um,15,Os mecânicos consertaram vários carros da oficina.,distratora,<b>Quantos carros foram consertados?</b>,Apenas um,Mais de um
+obj,um,18,O garotinho comeu o pedaço do bolo antes da vovó chegar.,distratora,<b>Quantos pedaços foram comidos?</b>,Apenas um,Mais de um
+obj,um,21,O policial prendeu o político durante a eleição.,distratora,<b>Quantos políticos foram presos?</b>,Apenas um, Mais de um
+obj,um,26,O arqueólogo encontrou o artefato antigo enquanto escavava.,distratora,<b>Quantos artefatos foram encontrados?</b>,Apenas um,Mais de um
