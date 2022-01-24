@@ -134,7 +134,6 @@ choice_data %>%
 round(65/(1219+65)*100, 2) # cerca de 5% perdidas
 
 
-
 #-------------------------------------------------------------------------------
 # Análise das sentenças distratoras
 #-------------------------------------------------------------------------------
@@ -149,7 +148,7 @@ expected_answers <- read.csv("/home/dados/Acadêmicos/Doutorado/EXPERIMENTOS_202
 expected_answers <- expected_answers %>%
   mutate(resposta = ifelse(frase == "Os pedreiros moveram alguns tijolos depois da obra.", "+um", resposta))
 
-expected_answers <- edit(expected_answers) # mudar 'posicao' para 'lista'
+names(expected_answers)[names(expected_answers) == 'posicao'] <- 'lista'
 
 # Mesclando as duas tabelas e filtrando apenas respostas à escolha forçada
 dist <- expected_answers %>%
@@ -244,25 +243,37 @@ apenas_um <- choice_data %>%
   mutate(SE=sqrt((prop*(1-prop))/n)) %>% # Calcula o erro padrão (Standad Error ou SE) da proporção
   mutate(SE_inf=prop-SE) %>%
   mutate(SE_sup=prop+SE) %>%
-  mutate(SE_inf=if_else(SE_inf<0, 0, SE_inf)) %>% # Limita os valores inferiores a zero
-  mutate(across(3:6, round, 4)) %>%
-  mutate_if(is.numeric, funs(.*100)) %>%
-  mutate(n = n/100) # Apenas para corrigir a multiplicação acima, que foi também para o 'inteiro'
+  mutate(SE_inf=if_else(SE_inf<0, 0, SE_inf)) #%>% # Limita os valores inferiores a zero
+  #mutate(across(3:6, round, 4)) %>%
+  #mutate_if(is.numeric, funs(.*100)) %>%
+  #mutate(n = n/100) # Apenas para corrigir a multiplicação acima, que foi também para o 'inteiro'
 
 setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Tabelas/")
 write.csv(apenas_um, "selfpaced_apenasUm.csv")
 
 cor <- brewer.pal("Set1", n = 3)
 
+cor <- c("#E41A1C", "#4DAF4A", "#377EB8")
+
 g <- apenas_um %>%
   ggplot(aes(x = fct_reorder(quant, prop), y = prop, color = quant)) +
-  geom_errorbar(aes(ymin = SE_inf, ymax = SE_sup), width = 0.08, size = 0.7, color = "grey60") +
+  geom_errorbar(aes(ymin = SE_inf, ymax = SE_sup), width = 0.1, size = 0.7, color = "grey60") +
   geom_point(fill="white", size = 1.5, shape = 21, stroke = 1) +
+  geom_segment(aes(y = .9, x = quant, yend = prop + .05, xend = quant),
+               arrow =  arrow(length = unit(0.1, "inches")),
+               color = "grey60") +
+  geom_text(aes(label = "Redução de 31%",
+                y = .76, x = 3.1), size = 3, color = "grey60") +
+  geom_text(aes(label = "Redução de 54%",
+                y = .76, x = 2.1), size = 3, color = "grey60") +
+  geom_text(aes(label = "Redução de 73%",
+                y = .76, x = 1.1), size = 3, color = "grey60") +
+  geom_point(aes(x = quant, y = .9), color = "grey60", fill="white", size = 1.5, shape = 21, stroke = 1) +
   theme_bw() +
   ylab("") + xlab("") +
   coord_flip() +
   scale_y_continuous(labels = scales::label_percent(accuracy = 1L),
-                     limits = c(.1, .7),
+                     limits = c(.1, .9),
                      breaks = seq(from = 0, to = 1, by = .1)) +
   scale_color_manual(values = cor, name = NULL,
                      labels = c("Cada", "Todo", "Todos os")) +
@@ -279,9 +290,10 @@ g <- apenas_um %>%
         legend.title=element_blank()) +
   ggtitle("Resposta dada: 'Apenas um'")
 
+
 setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
 g <- grid.arrange(g, ncol = 1)
-ggsave("Selfpaced_VisaoGeral.png", g, dpi = 300, width = 115, height = 85, units = "mm")
+ggsave("Selfpaced_VisaoGeral.png", g, dpi = 300, width = 135, height = 85, units = "mm")
 
 # os predicados originais eram altamente enviesados para uma leitura "Apenas um" (todas com mais de 90% para leituras 'Apenas um');
 # O objetivo, aqui, era verificar o quanto os quantificadores influenciavam nesse panorama;
@@ -334,7 +346,8 @@ g_rt <- teste %>%
   scale_x_discrete(label = c("1\n\nTodos\n\nCada\n\nTodo", "2\n\nos", "3\n\natletas\n\natleta\n\natleta",
                              "4\n\npintaram\n\npintou\n\npintou", "5\n\numa", "6\n\nquadra", "7\n\ndurante",
                              "8\n\na", "9\n\nreforma", "10\n\ndo", "11\n\nginásio.")) +
-  labs(x = "", y = "Tempo de Reação (RT)")  +
+  scale_y_continuous(breaks = seq(from = 450, to = 750, by = 50)) +
+  labs(x = "", y = "Tempo de Reação (RT)\n(em milisegundos)\n")  +
   theme(legend.title = element_blank(),
         legend.position = c(0.07, 0.9)) +
 #  ggtitle("Médias e erros padrão da média") +
@@ -425,6 +438,7 @@ g1 <- teste %>%
   filter(!is.na(Parametro)) %>%
   filter(RT <= 5000 & RT >= 150) %>%
   filter(Parametro == 4) %>% # Ver também posição 9
+  filter(quant != "todos os") %>%
   ggplot(aes(log(RT), ..scaled..)) +
   geom_density(aes(x = log(RT), color = quant, fill = quant), alpha = .4) +
   geom_segment(aes(x = 7.7, y = 0.25, xend = 7.7, yend = 0.1),
@@ -436,7 +450,8 @@ g1 <- teste %>%
   scale_color_manual(values = cor, name = NULL) +
   theme_classic() +
   facet_wrap(~Parametro) +
-  theme(legend.position = 'none') +
+  theme(legend.position = c(0.85, 0.85),
+        legend.text = element_text(size = 7)) +
   labs(y = "Densidade")
 
 # Fazendo o mesmo para a posição 5
@@ -445,19 +460,20 @@ g2 <- teste %>%
   filter(!is.na(Parametro)) %>%
   filter(RT <= 5000 & RT >= 150) %>%
   filter(Parametro == 5) %>% # Ver também posição 9
+  filter(quant != "todos os") %>%
   ggplot(aes(log(RT), ..scaled..)) +
   geom_density(aes(x = log(RT), color = quant, fill = quant), alpha = .4) +
-  geom_segment(aes(x = 7.7, y = 0.3, xend = 7.7, yend = 0.1),
-               arrow =  arrow(length = unit(0.2, "inches")),
+  geom_segment(aes(x = 7.4, y = 0.42, xend = 7.1, yend = 0.2),
+               arrow =  arrow(length = unit(0.1, "inches")),
                color = "grey") +
-  geom_text(aes(label = "Efeito\nrelacionado \nà cauda da\ndistribuição",
-                x = 7.7, y = 0.4)) +
+  geom_text(aes(label = "Efeito\nretardado \nda posição\nanterior",
+                x = 7.4, y = 0.6), size = 3) +
   scale_fill_manual(values = cor, name = NULL) +
   scale_color_manual(values = cor, name = NULL) +
   theme_classic() +
   facet_wrap(~Parametro) +
   theme(legend.position = 'none') +
-  labs(y = "Densidade")
+  labs(y = "")
 
 # Fazendo o mesmo para a posição 9
 
@@ -465,27 +481,25 @@ g3 <- teste %>%
   filter(!is.na(Parametro)) %>%
   filter(RT <= 5000 & RT >= 150) %>%
   filter(Parametro == 9) %>% # Ver também posição 9
+  filter(quant != "todos os") %>%
   ggplot(aes(log(RT), ..scaled..)) +
   geom_density(aes(x = log(RT), color = quant, fill = quant), alpha = .4) +
-  geom_segment(aes(x = 7.4, y = 0.39, xend = 6.9, yend = 0.3),
+  geom_segment(aes(x = 7.4, y = 0.42, xend = 6.9, yend = 0.3),
                arrow =  arrow(length = unit(0.1, "inches")),
                color = "grey") +
   geom_text(aes(label = "Efeito\nrelacionado\nao corpo da\ndistribuição",
-                x = 7.7, y = 0.4), size = 3) +
+                x = 7.7, y = 0.6), size = 3) +
   scale_fill_manual(values = cor, name = NULL) +
   scale_color_manual(values = cor, name = NULL) +
   theme_classic() +
   facet_wrap(~Parametro) +
-  theme(legend.position = c(0.13, 0.8),
-        legend.text = element_text(size = 7)) +
+  theme(legend.position = 'none') +
   labs(y = "")
 
 setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
-g_dist <- grid.arrange(g1, g3, ncol = 2)
+g_dist <- grid.arrange(g1, g2, g3, ncol = 3)
 ggsave("SelfPaced_Distrib.png", g_dist, dpi = 300, width = 230, height = 80, units = "mm")
 
-
-90-17
 
 #-------------------------------------------------------------------------------
 # Investigar apenas se necessário!
@@ -514,7 +528,8 @@ par %>%
 #-------------------------------------------------------------------------------
 # Aplicando EXPLORATORIAMENTE um modelo misto aos dados
 #-------------------------------------------------------------------------------
-require(lme4)  
+require(lme4)
+
 
 # Posição 4:
 # Diferença entre todo x cada, mas não entre todos os x cada
@@ -576,54 +591,126 @@ summary(model9)
 # diferença entre todo x cada
 # diferença entre todos os x cada
 
-
 # RESUMO:
 # Não há efeitos: p6, p7, p8
 # Há efeitos: p5 (apenas para 'todo', herdado de p4, não crítica) e p9 (para 'todo' e 'todos os')
 
 
+# Extraindo intervalo de confiança dos modelos aplicados
+modelos <- c(model4, model5, model6, model7, model8, model9)
+
+# Função autoral para extrair o intervalo de todos os modelos e colocar em uma tabela
+model.plot <- function(modelos){
+
+  tabela <- NULL
+    
+  for (i in 1:length(modelos)) {
+    
+    ci_modelos <- confint(modelos[[i]])
+    ci_modelos <- as.data.frame(ci_modelos[5:6,])
+    ci_modelos$estimates <- summary(modelos[[i]])$coefficients[2:3]
+    
+    tabela = rbind(tabela, data.frame(ci_modelos))
+  
+    }
+  
+  names(tabela)[names(tabela) == 'X2.5..'] <- 'ciinf'
+  names(tabela)[names(tabela) == 'X97.5..'] <- 'cisup'
+  
+  tabela$quant <- rep(c("todo", "todos os"), 6)
+  tabela$posicao <- rep(4:9, each = 2)
+  
+  print(tabela)    
+  
+}
+
+tabela <- model.plot(modelos)
+
+# Calculando diferenças em milisegundos a partir das estimativas do modelo
+
+# Posição 4
+model4
+
+cada <- 6.28605
+todo <- cada + 0.09204
+
+round(exp(todo)-exp(cada), 2) # Diferença de 51.77 milisegundos
+
+# Posição 4
+model5
+
+cada <- 6.18994
+todo <- cada + 0.06478
+
+round(exp(todo)-exp(cada), 2) # 32.65 milisegundos
 
 
+# Posição 9
+model9
 
+cada <- 6.13789
+todo <- cada + 0.07340
 
+round(exp(todo)-exp(cada), 2) # 35.27 milisegundos
 
-# Rascunho! Ainda a revisar!
+todo_os <- cada + 0.04275
 
-cis <- confint(model)
+round(exp(todo_os)-exp(cada), 2) # 20.23 milisegundos
 
-cis <- cis[5:6,]
+# Acrescentando esses dados à tabela
+tabela$difs <- c(51.77,NA,32.65,NA,NA,NA,NA,NA,NA,NA,35.27,20.27)
 
-summary(model)$coefficients[2:3]
+# Produzindo o gráfico com as estimativas dos modelos
+cor <- c("#4DAF4A", "#377EB8")
 
-final <- data.frame(fixef = c(0.06967179, 0.02140354),
-ciinf = c(0.02117232, -0.02708855),
-cisup = c(0.11818679, 0.06985144),
-quant = c("todo", "todos os"))
-
-final %>%
-  ggplot(aes(x = quant, y = fixef)) +
-  geom_hline(aes(yintercept = 0), color = "grey", size = 1, linetype = "dashed") +
-  geom_errorbar(aes(x = quant, ymin = ciinf, ymax = cisup), width = 0.1, size = 1) +
-  geom_point(color = "orange", size = 6, shape = 19) +
-  scale_y_continuous(breaks = seq(from = -0.03, to = 0.12, by = 0.03)) +
-  coord_flip() +
+g_model <- tabela %>%
+  mutate(posicao = as.factor(posicao)) %>%
+  ggplot(aes(x = posicao, y = estimates, color = quant)) +
+  geom_hline(aes(yintercept = 0), color = "#E41A1C", size = 0.8, linetype = "dashed", alpha = 0.6) +
+  geom_errorbar(aes(x = posicao, ymin = ciinf, ymax = cisup), width = 0.2, size = 0.8,
+                position = position_dodge(width = 0.6), alpha = 0.6) +
+  geom_point(aes(color = quant), size = 3, shape = 21, stroke = 1, fill = "white", position = position_dodge(width = 0.6)) +
+  geom_text(aes(label = round(difs, 0), x = posicao, y = estimates, group = quant), color = "grey40", size = 3.5,
+            position = position_dodge(width = 1.3)) +
+  scale_y_continuous(breaks = seq(from = -0.08, to = 0.15, by = 0.04)) +
+  scale_x_discrete(label = c("4\n\npint(ou/aram)", "5\n\numa", "6\n\nquadra", "7\n\ndurante", "8\n\na", "9\n\nreforma")) +
+  scale_color_manual(values = cor, name = NULL) +
   theme_classic() +
-  theme(text = element_text(size = 16)) +
-  labs(y = "\nEstimativa para os efeitos fixos em log(RT)", x = "")
+  theme(text = element_text(size = 12),
+        legend.title = element_blank(),
+        legend.position = c(0.9,0.15)) +
+  labs(y = "Estimativas em log(RT)\n", x = "")
 
-# Cada x todos os: diferença de 11 milisegundos
-exp(6.27157 + 0.02140) - exp(6.27157)
-
-# Cada x todo: 38 milisegundos
-exp(6.27157 + 0.06967179) - exp(6.27157)
+setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
+ggsave("SelfPaced_estimativas.png", g_model, dpi = 300, width = 180, height = 90, units = "mm")
 
 
-y %>%
-  filter(!is.na(Parametro)) %>%
-  filter(RT >= 150) %>%
-  filter(Parametro == 4) %>%
-  group_by(quant) %>%
-  summarise(medias = mean(RT, na.rm = T))
+#-------------------------------------------------------------------------------
+# Algumas verificações prévias
+# Há alguns casos de elementos não normais
+# Contudo, há o problema dos RTs serem assimétricos
+# Acredito que excluir esses valores extremos vai desconfigurar as posições 4 e 5
+#-------------------------------------------------------------------------------
 
-699-596 # diferença na amostra entre cada e todo
-608-596 # O modelo "recuperou bem esse", mas não o anterior (devido à distribuição da amostra, ao componente tau?)
+# Verificando a normalidade das condições
+ggplot(p9, aes(sample = log(RT))) + # Verificar todas as posições
+  stat_qq() +
+  stat_qq_line() +
+  facet_wrap(~quant)
+
+# Verificando a normalidade dos itens
+ggplot(p9, aes(sample = log(RT))) + # Verificar todas as posições
+  stat_qq() +
+  stat_qq_line() +
+  facet_wrap(~item)
+
+# Verificando a normalidade dos participantes
+ggplot(p9, aes(sample = log(RT))) + # Verificar todas as posições
+  stat_qq() +
+  stat_qq_line() +
+  facet_wrap(~Participante)
+
+
+
+library(lattice)
+print(dotplot(ranef(model9, condVar = TRUE)))
