@@ -40,6 +40,9 @@ require(forcats)
 require(RColorBrewer)
 require(gridExtra)
 require(lme4)
+library(lattice)
+require(retimes) # analiser distribuição ex-gaussiana
+
 
 dados <- read.pcibex("~/Downloads/results_112suj.csv")
 
@@ -238,18 +241,20 @@ apenas_um <- choice_data %>%
   mutate_if(is.integer, as.factor) %>%
   group_by(quant, Position) %>%
   tally() %>%
+  mutate(total = sum(n, na.rm = T)) %>% 
   mutate(prop = n/sum(n, na.rm = T)) %>%
   filter(Position == "Apenas um") %>%
   mutate(SE=sqrt((prop*(1-prop))/n)) %>% # Calcula o erro padrão (Standad Error ou SE) da proporção
   mutate(SE_inf=prop-SE) %>%
   mutate(SE_sup=prop+SE) %>%
   mutate(SE_inf=if_else(SE_inf<0, 0, SE_inf)) #%>% # Limita os valores inferiores a zero
-  #mutate(across(3:6, round, 4)) %>%
+  #mutate(across(4:7, round, 4)) %>%
   #mutate_if(is.numeric, funs(.*100)) %>%
-  #mutate(n = n/100) # Apenas para corrigir a multiplicação acima, que foi também para o 'inteiro'
+  #mutate(n = n/100) %>% # Apenas para corrigir a multiplicação acima, que foi também para o 'inteiro'
+  #mutate(total = total/100)
 
-setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Tabelas/")
-write.csv(apenas_um, "selfpaced_apenasUm.csv")
+#setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Tabelas/")
+#write.csv(apenas_um, "selfpaced_apenasUm.csv")
 
 cor <- brewer.pal("Set1", n = 3)
 
@@ -290,10 +295,9 @@ g <- apenas_um %>%
         legend.title=element_blank()) +
   ggtitle("Resposta dada: 'Apenas um'")
 
-
-setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
-g <- grid.arrange(g, ncol = 1)
-ggsave("Selfpaced_VisaoGeral.png", g, dpi = 300, width = 135, height = 85, units = "mm")
+#setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
+#g <- grid.arrange(g, ncol = 1)
+#ggsave("Selfpaced_VisaoGeral.png", g, dpi = 300, width = 135, height = 85, units = "mm")
 
 # os predicados originais eram altamente enviesados para uma leitura "Apenas um" (todas com mais de 90% para leituras 'Apenas um');
 # O objetivo, aqui, era verificar o quanto os quantificadores influenciavam nesse panorama;
@@ -333,8 +337,8 @@ g_rt <- teste %>%
   summarise(meanRT = mean(RT, na.rm = T), # Com log RT fica melhor, creio
             SD = sd(RT, na.rm = T),
             n = n(),
-            SE = SD/sqrt(n),
-            CI = SE*1.96) %>%
+            SE = SD/sqrt(n), # Erro padrão
+            CI = SE*1.96) %>% # Intervalo de confiança
   ggplot(aes(x = as.factor(Parametro), y = meanRT, group = quant, color = quant, linetype = quant)) +
   geom_line(position = position_dodge(width = 0.4)) +
   geom_errorbar(aes(x = as.factor(Parametro), ymin = meanRT - SE, ymax = meanRT + SE),
@@ -355,9 +359,9 @@ g_rt <- teste %>%
   annotate("rect", xmin=6.5, xmax=7.5, ymin=430, ymax=650, alpha=0.1, fill="orange") +
   annotate("rect", xmin=7.7, xmax=9.3, ymin=430, ymax=650, alpha=0.1, fill="green")
 
-setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
-g_rt <- grid.arrange(g_rt, ncol = 1)
-ggsave("SelfPaced_RTs.png", g_rt, dpi = 300, width = 230, height = 100, units = "mm")
+#setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
+#g_rt <- grid.arrange(g_rt, ncol = 1)
+#ggsave("SelfPaced_RTs.png", g_rt, dpi = 300, width = 230, height = 100, units = "mm")
 
 
 
@@ -432,7 +436,7 @@ teste %>%
   theme_classic() +
   facet_wrap(~Parametro)
 
-cor <- c("#E41A1C", "#4DAF4A", "#377EB8")
+cor <- c("#E41A1C", "#4DAF4A")
 
 g1 <- teste %>%
   filter(!is.na(Parametro)) %>%
@@ -502,16 +506,14 @@ ggsave("SelfPaced_Distrib.png", g_dist, dpi = 300, width = 230, height = 80, uni
 
 
 #-------------------------------------------------------------------------------
-# Investigar apenas se necessário!
+# Investigando a proveniência dos efeitos da distribuição ex-gaussiana
 #-------------------------------------------------------------------------------
-require(retimes)
-
 y <- teste %>%
-  filter(Parametro == 4) %>%
+  filter(Parametro == 9) %>%
   filter(RT >= 150)
 
 par <- y %>%
-  filter(RT <= 3000) %>%
+  filter(RT <= 5000) %>%
   group_by(quant) %>%
   summarise(parametros = mexgauss(RT))
 
@@ -528,9 +530,6 @@ par %>%
 #-------------------------------------------------------------------------------
 # Aplicando EXPLORATORIAMENTE um modelo misto aos dados
 #-------------------------------------------------------------------------------
-require(lme4)
-
-
 # Posição 4:
 # Diferença entre todo x cada, mas não entre todos os x cada
 
@@ -538,8 +537,11 @@ p4 <- teste %>%
   filter(Parametro == 4) %>%
   filter(RT <= 5000 & RT >= 150)
 
-model4 <- lmer(log(RT) ~ quant + (1|Participante) + (1|item), data = p4) # singular com slopes para participantes ou itens
+model4 <- lmer(log(RT) ~ quant + (1|Participante) + (1 + quant|item), data = p4)
 summary(model4)
+
+# Investigação dos efeitos aleatórios
+print(dotplot(ranef(model4, condVar = TRUE)))
 
 # Diferença entre todo x cada, mas não entre todos os x cada
 
@@ -547,8 +549,11 @@ p5 <- teste %>%
   filter(Parametro == 5) %>%
   filter(RT <= 5000 & RT >= 150)
 
-model5 <- lmer(log(RT) ~ quant + (1|Participante) + (1|item), data = p5) # singular com slopes para participantes ou itens
+model5 <- lmer(log(RT) ~ quant + (1 + quant|Participante) + (1|item), data = p5) # singular com slopes para participantes ou itens
 summary(model5)
+
+# Investigação dos efeitos aleatórios
+print(dotplot(ranef(model5, condVar = TRUE)))
 
 # Posição 5:
 # Diferença entre todo x cada, mas não entre todos os x cada
@@ -561,6 +566,9 @@ p6 <- teste %>%
 model6 <- lmer(log(RT) ~ quant + (1|Participante) + (1|item), data = p6) # singular com slopes para participantes ou itens
 summary(model6)
 
+# Investigação dos efeitos aleatórios
+print(dotplot(ranef(model6, condVar = TRUE)))
+
 # Não há efeitos!
 
 p7 <- teste %>%
@@ -569,6 +577,9 @@ p7 <- teste %>%
 
 model7 <- lmer(log(RT) ~ quant + (1|Participante) + (1|item), data = p7) # singular com slopes para participantes ou itens
 summary(model7)
+
+# Investigação dos efeitos aleatórios
+print(dotplot(ranef(model7, condVar = TRUE)))
 
 # Não há efeitos!
 
@@ -579,6 +590,9 @@ p8 <- teste %>%
 model8 <- lmer(log(RT) ~ quant + (1|Participante) + (1|item), data = p8) # singular com slopes para participantes ou itens
 summary(model8)
 
+# Investigação dos efeitos aleatórios
+print(dotplot(ranef(model8, condVar = TRUE)))
+
 # Não há efeitos!
 
 p9 <- teste %>%
@@ -587,6 +601,9 @@ p9 <- teste %>%
 
 model9 <- lmer(log(RT) ~ quant + (1|Participante) + (1|item), data = p9) # singular com slopes para participantes ou itens
 summary(model9)
+
+# Investigação dos efeitos aleatórios
+print(dotplot(ranef(model9, condVar = TRUE)))
 
 # diferença entre todo x cada
 # diferença entre todos os x cada
@@ -599,7 +616,7 @@ summary(model9)
 # Extraindo intervalo de confiança dos modelos aplicados
 modelos <- c(model4, model5, model6, model7, model8, model9)
 
-# Função autoral para extrair o intervalo de todos os modelos e colocar em uma tabela
+# Função autoral para extrair o intervalo de confiança dos modelos e colocar em uma tabela
 model.plot <- function(modelos){
 
   tabela <- NULL
@@ -607,7 +624,7 @@ model.plot <- function(modelos){
   for (i in 1:length(modelos)) {
     
     ci_modelos <- confint(modelos[[i]])
-    ci_modelos <- as.data.frame(ci_modelos[5:6,])
+    ci_modelos <- as.data.frame(ci_modelos[(nrow(ci_modelos)-1):(nrow(ci_modelos)),])
     ci_modelos$estimates <- summary(modelos[[i]])$coefficients[2:3]
     
     tabela = rbind(tabela, data.frame(ci_modelos))
@@ -628,37 +645,36 @@ tabela <- model.plot(modelos)
 
 # Calculando diferenças em milisegundos a partir das estimativas do modelo
 
-# Posição 4
-model4
+dif.estimates <- function(modelos){
+  
+difer <- NULL
 
-cada <- 6.28605
-todo <- cada + 0.09204
+for(i in 1:length(modelos)){
 
-round(exp(todo)-exp(cada), 2) # Diferença de 51.77 milisegundos
+  diferencas <- data.frame(
+    intercept = summary(modelos[[i]])$coefficients[1],
+    todo = summary(modelos[[i]])$coefficients[1] + summary(modelos[[i]])$coefficients[2],
+    todos_os = summary(modelos[[i]])$coefficients[1] + summary(modelos[[i]])$coefficients[3])
+  
+  difer = rbind(difer, data.frame(diferencas))
+  
+}
 
-# Posição 4
-model5
+difer$dif_todo <- round(exp(difer[,2])-exp(difer[,1]), 2)
+difer$dif_todos_os <- round(exp(difer[,3])-exp(difer[,1]), 2)
 
-cada <- 6.18994
-todo <- cada + 0.06478
+difer$posicao <- rep(4:9, each = 1)
 
-round(exp(todo)-exp(cada), 2) # 32.65 milisegundos
+print(difer)
 
+}
 
-# Posição 9
-model9
+# 3 primeiras colunas estão em logaritmo de milegundos
+# 2 penúltimas estão em milisegundos e são a diferença entre cada condição e o intercepto
+dif.estimates(modelos)
 
-cada <- 6.13789
-todo <- cada + 0.07340
-
-round(exp(todo)-exp(cada), 2) # 35.27 milisegundos
-
-todo_os <- cada + 0.04275
-
-round(exp(todo_os)-exp(cada), 2) # 20.23 milisegundos
-
-# Acrescentando esses dados à tabela
-tabela$difs <- c(51.77,NA,32.65,NA,NA,NA,NA,NA,NA,NA,35.27,20.27)
+# Acrescentando esses dados (apenas os significativos) à tabela
+tabela$difs <- c(51.91,NA,32.92,NA,NA,NA,NA,NA,NA,NA,35.27,20.23)
 
 # Produzindo o gráfico com as estimativas dos modelos
 cor <- c("#4DAF4A", "#377EB8")
@@ -673,7 +689,7 @@ g_model <- tabela %>%
   geom_text(aes(label = round(difs, 0), x = posicao, y = estimates, group = quant), color = "grey40", size = 3.5,
             position = position_dodge(width = 1.3)) +
   scale_y_continuous(breaks = seq(from = -0.08, to = 0.15, by = 0.04)) +
-  scale_x_discrete(label = c("4\n\npint(ou/aram)", "5\n\numa", "6\n\nquadra", "7\n\ndurante", "8\n\na", "9\n\nreforma")) +
+  scale_x_discrete(label = c("4\n\npintou/aram", "5\n\numa", "6\n\nquadra", "7\n\ndurante", "8\n\na", "9\n\nreforma")) +
   scale_color_manual(values = cor, name = NULL) +
   theme_classic() +
   theme(text = element_text(size = 12),
@@ -681,9 +697,8 @@ g_model <- tabela %>%
         legend.position = c(0.9,0.15)) +
   labs(y = "Estimativas em log(RT)\n", x = "")
 
-setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
-ggsave("SelfPaced_estimativas.png", g_model, dpi = 300, width = 180, height = 90, units = "mm")
-
+#setwd("/home/dados/Acadêmicos/Doutorado/Qualificação/Texto/Imagens/")
+#ggsave("SelfPaced_estimativas.png", g_model, dpi = 300, width = 180, height = 90, units = "mm")
 
 #-------------------------------------------------------------------------------
 # Algumas verificações prévias
@@ -709,8 +724,3 @@ ggplot(p9, aes(sample = log(RT))) + # Verificar todas as posições
   stat_qq() +
   stat_qq_line() +
   facet_wrap(~Participante)
-
-
-
-library(lattice)
-print(dotplot(ranef(model9, condVar = TRUE)))
